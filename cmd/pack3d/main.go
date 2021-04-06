@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"os"
+	_ "os"
 	"strconv"
 	"time"
 
 	"github.com/fogleman/fauxgl"
-	"github.com/fogleman/pack3d/pack3d"
+	"github.com/BrentG-1849260/pack3d/pack3d"
 )
 
 const (
@@ -29,8 +29,8 @@ func timed(name string) func() {
 }
 
 func main() {
-	outputNamePtr := flag.String("output_name", "packing", "the name of the output stl file")
-	execTimePtr := flag.Int("exec_time", 300, "stop after approximately this amount of seconds")
+	outputPathPtr := flag.String("output_path", "packing", "path to the output stl file")
+	execTimePtr := flag.Int("exec_time", 180, "stop after approximately this amount of seconds")
 	flag.Parse()
 
 	var done func()
@@ -41,7 +41,7 @@ func main() {
 	count := 1
 	ok := false
 	var totalVolume float64
-	for arg := range flag.Args() {
+	for _, arg := range flag.Args() {
 		_count, err := strconv.ParseInt(arg, 0, 0)
 		if err == nil {
 			count = int(_count)
@@ -73,8 +73,8 @@ func main() {
 	if !ok {
 		fmt.Println("Usage: pack3d -output_name=name -exec_time=180 N1 mesh1.stl N2 mesh2.stl ...")
 		fmt.Println(" - Packs N copies of each mesh into as small of a volume as possible.")
-		fmt.Println(" - Runs forever, looking for the best packing.")
-		fmt.Println(" - Results are written to disk whenever a new best is found.")
+		fmt.Println(" - Runs for approximately exec_time seconds")
+		fmt.Println(" - Results are written to disk (at output_path) whenever a new best is found.")
 		return
 	}
 
@@ -89,7 +89,7 @@ func main() {
 		if score < best {
 			best = score
 			done = timed("writing mesh")
-			model.Mesh().SaveSTL(fmt.Sprintf(*outputNamePtr + ".stl"))
+			model.Mesh().SaveSTL(fmt.Sprintf(*outputPathPtr))
 			// model.TreeMesh().SaveSTL(fmt.Sprintf("out%dtree.stl", int(score*100000)))
 			done()
 		}
