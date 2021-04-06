@@ -1,3 +1,9 @@
+# Modifications in fork
+Added 2 options, choosing the name of the output file and choosing the amount of seconds that the program executes.
+```
+pack3d N -output_name=name -exec_time=180 mesh1.stl mesh2.stl ...
+```
+
 # pack3d
 
 Tightly pack 3D models.
