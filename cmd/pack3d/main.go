@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math"
 	"math/rand"
@@ -28,6 +29,10 @@ func timed(name string) func() {
 }
 
 func main() {
+	outputNamePtr := flag.String("output_name", "packing", "the name of the output stl file")
+	execTimePtr := flag.Int("exec_time", 300, "stop after approximately this amount of seconds")
+	flag.Parse()
+
 	var done func()
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -36,7 +41,7 @@ func main() {
 	count := 1
 	ok := false
 	var totalVolume float64
-	for _, arg := range os.Args[1:] {
+	for arg := range flag.Args() {
 		_count, err := strconv.ParseInt(arg, 0, 0)
 		if err == nil {
 			count = int(_count)
@@ -77,16 +82,20 @@ func main() {
 	model.Deviation = side / 32
 
 	best := 1e9
+	startTime := time.Now()
 	for {
 		model = model.Pack(annealingIterations, nil)
 		score := model.Energy()
 		if score < best {
 			best = score
 			done = timed("writing mesh")
-			model.Mesh().SaveSTL(fmt.Sprintf("pack3d-%.3f.stl", score))
+			model.Mesh().SaveSTL(fmt.Sprintf(*outputNamePtr + ".stl"))
 			// model.TreeMesh().SaveSTL(fmt.Sprintf("out%dtree.stl", int(score*100000)))
 			done()
 		}
 		model.Reset()
+		if time.Now().Sub(startTime).Seconds() > *execTimePtr {
+			break
+		}
 	}
 }
