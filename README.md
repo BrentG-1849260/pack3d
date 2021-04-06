@@ -1,7 +1,12 @@
 # Modifications in fork
 Added 2 options, choosing the name of the output file and choosing the amount of seconds that the program executes.
 ```
-pack3d N -output_name=name -exec_time=180 mesh1.stl mesh2.stl ...
+> pack3d -h
+Usage of pack3d:
+  -exec_time int
+        stop after approximately this amount of seconds (default 180)
+  -output_path string
+        path to the output stl file (default "packing")
 ```
 
 # pack3d
