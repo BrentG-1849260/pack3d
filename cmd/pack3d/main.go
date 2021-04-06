@@ -71,7 +71,7 @@ func main() {
 	}
 
 	if !ok {
-		fmt.Println("Usage: pack3d N1 mesh1.stl N2 mesh2.stl ...")
+		fmt.Println("Usage: pack3d -output_name=name -exec_time=180 N1 mesh1.stl N2 mesh2.stl ...")
 		fmt.Println(" - Packs N copies of each mesh into as small of a volume as possible.")
 		fmt.Println(" - Runs forever, looking for the best packing.")
 		fmt.Println(" - Results are written to disk whenever a new best is found.")
@@ -94,7 +94,7 @@ func main() {
 			done()
 		}
 		model.Reset()
-		if time.Now().Sub(startTime).Seconds() > *execTimePtr {
+		if int(time.Now().Sub(startTime).Seconds()) > *execTimePtr {
 			break
 		}
 	}
