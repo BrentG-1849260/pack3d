@@ -60,7 +60,11 @@ func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int, rotAllowed bool) {
 	tree := NewTreeForMesh(mesh, detail)
 	trees := make([]Tree, len(Rotations))
 	for i, m := range Rotations {
-		trees[i] = tree.Transform(m)
+		if rotAllowed {
+			trees[i] = tree.Transform(m)
+		} else {
+			trees[i] = tree
+		}
 	}
 	for i := 0; i < count; i++ {
 		m.add(mesh, trees, rotAllowed)
