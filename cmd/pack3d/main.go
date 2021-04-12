@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fogleman/fauxgl"
 	"github.com/BrentG-1849260/pack3d/pack3d"
+	"github.com/fogleman/fauxgl"
 )
 
 const (
@@ -36,7 +36,7 @@ func main() {
 	flag.Parse()
 
 	flagsOk := true
-	rotationAllowance := make([]bool, len(flag.Args()))
+	rotationAllowance := make([]bool, len(flag.Args())-1)
 	for i, _ := range rotationAllowance {
 		rotationAllowance[i] = true
 	}
@@ -87,7 +87,7 @@ func main() {
 		done()
 
 		done = timed("building bvh tree")
-		model.Add(mesh, bvhDetail, count, rotationAllowance[i])
+		model.Add(mesh, bvhDetail, count, rotationAllowance[i-1])
 		ok = true
 		done()
 	}

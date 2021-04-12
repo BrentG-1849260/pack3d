@@ -60,11 +60,7 @@ func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int, rotAllowed bool) {
 	tree := NewTreeForMesh(mesh, detail)
 	trees := make([]Tree, len(Rotations))
 	for i, m := range Rotations {
-		if rotAllowed {
-			trees[i] = tree.Transform(m)
-		} else {
-			trees[i] = tree
-		}
+		trees[i] = tree.Transform(m)
 	}
 	for i := 0; i < count; i++ {
 		m.add(mesh, trees, rotAllowed)
@@ -73,7 +69,7 @@ func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int, rotAllowed bool) {
 
 func (m *Model) add(mesh *fauxgl.Mesh, trees []Tree, rotAllowed bool) {
 	index := len(m.Items)
-	item := Item{mesh, trees, 0, fauxgl.Vector{}, rotAllowed}
+	item := Item{mesh, trees, 5, fauxgl.Vector{}, rotAllowed}
 	m.Items = append(m.Items, &item)
 	d := 1.0
 	for !m.ValidChange(index) {
@@ -83,7 +79,7 @@ func (m *Model) add(mesh *fauxgl.Mesh, trees []Tree, rotAllowed bool) {
 		item.Translation = fauxgl.RandomUnitVector().MulScalar(d)
 		d *= 1.2
 	}
-	tree := trees[0]
+	tree := trees[item.Rotation]
 	m.MinVolume = math.Max(m.MinVolume, tree[0].Volume())
 	m.MaxVolume += tree[0].Volume()
 }
