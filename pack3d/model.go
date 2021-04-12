@@ -114,6 +114,14 @@ func (m *Model) Mesh() *fauxgl.Mesh {
 	return result
 }
 
+func (m *Model) Transformations() []fauxgl.Matrix {
+	result := make([]fauxgl.Matrix, len(m.Items))
+	for i, item := range m.Items {
+		result[i] = item.Matrix()
+	}
+	return result
+}
+
 func (m *Model) TreeMeshes() []*fauxgl.Mesh {
 	result := make([]*fauxgl.Mesh, len(m.Items))
 	for i, item := range m.Items {
