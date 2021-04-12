@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	_ "os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fogleman/fauxgl"
@@ -29,9 +30,30 @@ func timed(name string) func() {
 }
 
 func main() {
-	outputPathPtr := flag.String("output_path", "packing", "path to the output stl file")
-	execTimePtr := flag.Int("exec_time", 180, "stop after approximately this amount of seconds")
+	outputPathPtr := flag.String("output_path", "packing.stl", "Path to the output stl file.")
+	execTimePtr := flag.Int("exec_time", 180, "Stop after approximately this amount of seconds.")
+	rotAllowedPtr := flag.String("rot", "", "Comma-separated list of booleans to disable/enable rotations for each object. E.g. for 3 objects: -rot=1,0,1 where 0 means rotation is not allowed. (all enabled by default)")
 	flag.Parse()
+
+	flagsOk := true
+	rotationAllowance := make([]bool, len(flag.Args()))
+	for i, _ := range rotationAllowance {
+		rotationAllowance[i] = true
+	}
+	if *rotAllowedPtr != "" {
+		parts := strings.Split(*rotAllowedPtr, ",")
+		for i, rotAllowed := range parts {
+			b, err := strconv.ParseBool(rotAllowed)
+			if err != nil {
+				flagsOk = false
+				break
+			}
+			if i >= len(rotationAllowance) {
+				break
+			}
+			rotationAllowance[i] = b
+		}
+	}
 
 	var done func()
 
@@ -41,7 +63,7 @@ func main() {
 	count := 1
 	ok := false
 	var totalVolume float64
-	for _, arg := range flag.Args() {
+	for i, arg := range flag.Args() {
 		_count, err := strconv.ParseInt(arg, 0, 0)
 		if err == nil {
 			count = int(_count)
@@ -65,15 +87,16 @@ func main() {
 		done()
 
 		done = timed("building bvh tree")
-		model.Add(mesh, bvhDetail, count)
+		model.Add(mesh, bvhDetail, count, rotationAllowance[i])
 		ok = true
 		done()
 	}
 
-	if !ok {
-		fmt.Println("Usage: pack3d -output_name=name -exec_time=180 N1 mesh1.stl N2 mesh2.stl ...")
+	if !ok || !flagsOk {
+		fmt.Println("Usage: pack3d -output_path=path/to/output.stl -exec_time=180 -rot=1,0... N1 mesh1.stl N2 mesh2.stl ...")
 		fmt.Println(" - Packs N copies of each mesh into as small of a volume as possible.")
-		fmt.Println(" - Runs for approximately exec_time seconds")
+		fmt.Println(" - Runs for approximately exec_time seconds.")
+		fmt.Println(" - Rotations for each object are disabled/enabled using -rot.")
 		fmt.Println(" - Results are written to disk (at output_path) whenever a new best is found.")
 		return
 	}
