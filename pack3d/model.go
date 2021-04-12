@@ -33,6 +33,7 @@ type Item struct {
 	Trees       []Tree
 	Rotation    int
 	Translation fauxgl.Vector
+	RotAllowed  bool
 }
 
 func (item *Item) Matrix() fauxgl.Matrix {
@@ -46,38 +47,35 @@ func (item *Item) Copy() *Item {
 
 type Model struct {
 	Items     []*Item
-	RotAllowance []bool
 	MinVolume float64
 	MaxVolume float64
 	Deviation float64
 }
 
 func NewModel() *Model {
-	return &Model{nil, nil, 0, 0, 1}
+	return &Model{nil, 0, 0, 1}
 }
 
-func (m *Model) SetRotationAllowance(rotAllowance []bool) {
-	m.RotAllowance = rotAllowance
-}
-
-func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int) {
+func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int, rotAllowed bool) {
 	tree := NewTreeForMesh(mesh, detail)
 	trees := make([]Tree, len(Rotations))
 	for i, m := range Rotations {
 		trees[i] = tree.Transform(m)
 	}
 	for i := 0; i < count; i++ {
-		m.add(mesh, trees)
+		m.add(mesh, trees, rotAllowed)
 	}
 }
 
-func (m *Model) add(mesh *fauxgl.Mesh, trees []Tree) {
+func (m *Model) add(mesh *fauxgl.Mesh, trees []Tree, rotAllowed bool) {
 	index := len(m.Items)
-	item := Item{mesh, trees, 0, fauxgl.Vector{}}
+	item := Item{mesh, trees, 0, fauxgl.Vector{}, rotAllowed}
 	m.Items = append(m.Items, &item)
 	d := 1.0
 	for !m.ValidChange(index) {
-		item.Rotation = rand.Intn(len(Rotations))
+		if item.RotAllowed {
+			item.Rotation = rand.Intn(len(Rotations))
+		}
 		item.Translation = fauxgl.RandomUnitVector().MulScalar(d)
 		d *= 1.2
 	}
@@ -92,7 +90,7 @@ func (m *Model) Reset() {
 	m.MinVolume = 0
 	m.MaxVolume = 0
 	for _, item := range items {
-		m.add(item.Mesh, item.Trees)
+		m.add(item.Mesh, item.Trees, item.RotAllowed)
 	}
 }
 
@@ -187,7 +185,7 @@ func (m *Model) DoMove() Undo {
 	item := m.Items[i]
 	undo := Undo{i, item.Rotation, item.Translation}
 	for {
-		if m.RotAllowance[i] && rand.Intn(4) == 0 {
+		if item.RotAllowed && rand.Intn(4) == 0 {
 			// rotate
 			item.Rotation = rand.Intn(len(Rotations))
 		} else {
@@ -216,5 +214,5 @@ func (m *Model) Copy() Annealable {
 	for i, item := range m.Items {
 		items[i] = item.Copy()
 	}
-	return &Model{items, m.RotAllowance,m.MinVolume, m.MaxVolume, m.Deviation}
+	return &Model{items, m.MinVolume, m.MaxVolume, m.Deviation}
 }
