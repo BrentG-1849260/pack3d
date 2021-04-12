@@ -36,7 +36,7 @@ func main() {
 	flag.Parse()
 
 	flagsOk := true
-	rotationAllowance := make([]bool, len(flag.Args())-1)
+	rotationAllowance := make([]bool, len(flag.Args()))
 	for i, _ := range rotationAllowance {
 		rotationAllowance[i] = true
 	}
