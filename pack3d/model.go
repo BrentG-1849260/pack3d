@@ -46,13 +46,18 @@ func (item *Item) Copy() *Item {
 
 type Model struct {
 	Items     []*Item
+	RotAllowance []bool
 	MinVolume float64
 	MaxVolume float64
 	Deviation float64
 }
 
 func NewModel() *Model {
-	return &Model{nil, 0, 0, 1}
+	return &Model{nil, nil, 0, 0, 1}
+}
+
+func (m *Model) SetRotationAllowance(rotAllowance []bool) {
+	m.RotAllowance = rotAllowance
 }
 
 func (m *Model) Add(mesh *fauxgl.Mesh, detail, count int) {
@@ -182,7 +187,7 @@ func (m *Model) DoMove() Undo {
 	item := m.Items[i]
 	undo := Undo{i, item.Rotation, item.Translation}
 	for {
-		if rand.Intn(4) == 0 {
+		if m.RotAllowance[i] && rand.Intn(4) == 0 {
 			// rotate
 			item.Rotation = rand.Intn(len(Rotations))
 		} else {
@@ -211,5 +216,5 @@ func (m *Model) Copy() Annealable {
 	for i, item := range m.Items {
 		items[i] = item.Copy()
 	}
-	return &Model{items, m.MinVolume, m.MaxVolume, m.Deviation}
+	return &Model{items, m.RotAllowance,m.MinVolume, m.MaxVolume, m.Deviation}
 }
