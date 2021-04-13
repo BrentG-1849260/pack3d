@@ -63,7 +63,11 @@ func main() {
 	count := 1
 	ok := false
 	var totalVolume float64
+	startedAtZero := false
 	for i, arg := range flag.Args() {
+		if i == 0 {
+			startedAtZero = true
+		}
 		_count, err := strconv.ParseInt(arg, 0, 0)
 		if err == nil {
 			count = int(_count)
@@ -87,9 +91,11 @@ func main() {
 		done()
 
 		done = timed("building bvh tree")
-		fmt.Println(i)
-		fmt.Println(rotationAllowance)
-		model.Add(mesh, bvhDetail, count, rotationAllowance[i-1])
+		if startedAtZero {
+			model.Add(mesh, bvhDetail, count, rotationAllowance[i])
+		} else {
+			model.Add(mesh, bvhDetail, count, rotationAllowance[i - 1])
+		}
 		ok = true
 		done()
 	}
