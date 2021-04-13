@@ -87,6 +87,8 @@ func main() {
 		done()
 
 		done = timed("building bvh tree")
+		fmt.Println(i)
+		fmt.Println(rotationAllowance)
 		model.Add(mesh, bvhDetail, count, rotationAllowance[i-1])
 		ok = true
 		done()
